@@ -12,4 +12,8 @@
 !/log/.keep
 /tmp
 
+# Ignore all vim tempfiles.
+*.swp
+*.swo
+
 .byebug_history
