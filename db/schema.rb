@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160517053247) do
+ActiveRecord::Schema.define(version: 20160517055254) do
 
   create_table "active_admin_comments", force: :cascade do |t|
     t.string   "namespace",     limit: 255
@@ -27,5 +27,17 @@ ActiveRecord::Schema.define(version: 20160517053247) do
   add_index "active_admin_comments", ["author_type", "author_id"], name: "index_active_admin_comments_on_author_type_and_author_id", using: :btree
   add_index "active_admin_comments", ["namespace"], name: "index_active_admin_comments_on_namespace", using: :btree
   add_index "active_admin_comments", ["resource_type", "resource_id"], name: "index_active_admin_comments_on_resource_type_and_resource_id", using: :btree
+
+  create_table "videos", force: :cascade do |t|
+    t.string   "name",            limit: 255
+    t.text     "desc",            limit: 65535
+    t.string   "origin_link",     limit: 255
+    t.string   "creator_name",    limit: 255
+    t.text     "creator_desc",    limit: 65535
+    t.integer  "num_of_views",    limit: 4
+    t.integer  "num_of_comments", limit: 4
+    t.datetime "created_at",                    null: false
+    t.datetime "updated_at",                    null: false
+  end
 
 end

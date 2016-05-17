@@ -1,0 +1,12 @@
+= semantic_form_for @video do |f|
+  = f.inputs do
+    = f.input :name
+    = f.input :desc
+    = f.input :origin_link
+    = f.input :creator_name
+    = f.input :creator_desc
+    = f.input :num_of_views
+    = f.input :num_of_comments
+
+  = f.actions do
+    = f.action :submit, as: :input

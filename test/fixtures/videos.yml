@@ -1,0 +1,19 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  name: MyString
+  desc: MyText
+  origin_link: MyString
+  creator_name: MyString
+  creator_desc: MyText
+  num_of_views: 1
+  num_of_comments: 1
+
+two:
+  name: MyString
+  desc: MyText
+  origin_link: MyString
+  creator_name: MyString
+  creator_desc: MyText
+  num_of_views: 1
+  num_of_comments: 1

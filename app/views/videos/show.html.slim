@@ -1,0 +1,27 @@
+p#notice = notice
+
+p
+  strong Name:
+  = @video.name
+p
+  strong Desc:
+  = @video.desc
+p
+  strong Origin link:
+  = @video.origin_link
+p
+  strong Creator name:
+  = @video.creator_name
+p
+  strong Creator desc:
+  = @video.creator_desc
+p
+  strong Num of views:
+  = @video.num_of_views
+p
+  strong Num of comments:
+  = @video.num_of_comments
+
+= link_to 'Edit', edit_video_path(@video)
+'|
+= link_to 'Back', videos_path
