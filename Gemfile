@@ -50,3 +50,4 @@ gem "slim-rails"
 
 gem 'activeadmin', '~> 1.0.0.pre2'
 
+gem 'selenium-webdriver'

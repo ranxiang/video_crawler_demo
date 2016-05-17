@@ -16,4 +16,7 @@
 *.swp
 *.swo
 
+# Ignore all video file
+/public/videos/*
+
 .byebug_history
