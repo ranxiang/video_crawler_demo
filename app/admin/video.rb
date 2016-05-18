@@ -26,7 +26,7 @@ ActiveAdmin.register Video do
     column :num_of_comments
     column :active
     column :last_fetch_date
-    actions do |video|
+    actions defaults: false do |video|
       link_to("Preview", video.relative_file_url, target: "_blank")
     end
   end
