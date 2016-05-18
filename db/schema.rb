@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160518052200) do
+ActiveRecord::Schema.define(version: 20160518063739) do
 
   create_table "active_admin_comments", force: :cascade do |t|
     t.string   "namespace",     limit: 255
@@ -29,17 +29,20 @@ ActiveRecord::Schema.define(version: 20160518052200) do
   add_index "active_admin_comments", ["resource_type", "resource_id"], name: "index_active_admin_comments_on_resource_type_and_resource_id", using: :btree
 
   create_table "videos", force: :cascade do |t|
-    t.string   "name",            limit: 255
-    t.text     "desc",            limit: 65535
-    t.string   "creator_name",    limit: 255
-    t.text     "creator_desc",    limit: 65535
-    t.integer  "num_of_views",    limit: 4
-    t.integer  "num_of_comments", limit: 4
-    t.datetime "created_at",                    null: false
-    t.datetime "updated_at",                    null: false
-    t.string   "source_type",     limit: 255
-    t.string   "source_video_id", limit: 255
-    t.string   "md5",             limit: 255
+    t.string   "name",                     limit: 255
+    t.text     "desc",                     limit: 65535
+    t.string   "creator_name",             limit: 255
+    t.text     "creator_desc",             limit: 65535
+    t.integer  "num_of_views",             limit: 4
+    t.integer  "num_of_comments",          limit: 4
+    t.datetime "created_at",                             null: false
+    t.datetime "updated_at",                             null: false
+    t.string   "source_type",              limit: 255
+    t.string   "source_video_id",          limit: 255
+    t.string   "md5",                      limit: 255
+    t.boolean  "active"
+    t.datetime "last_fetch_date"
+    t.datetime "last_metadata_fetch_date"
   end
 
 end

@@ -34,6 +34,12 @@ class Video < ActiveRecord::Base
     self.num_of_comments = comments['data']['total']
   end
 
+  def set_daily_update_metadata
+    set_num_of_views
+    set_num_of_comments
+    self.last_metadata_fetch_date = DateTime.now
+  end
+
   def set_metadata
     logger.debug "Starting set metadata"
 
@@ -41,8 +47,7 @@ class Video < ActiveRecord::Base
     self.desc = doc.css('#video-description').first.inner_html.strip
     self.creator_name = doc.css('.channel-title span a').first.inner_html.strip
 
-    set_num_of_views
-    set_num_of_comments
+    set_daily_update_metadata
 
     # creator_desc, nothing found in origin page about this column
   end
@@ -65,7 +70,7 @@ class Video < ActiveRecord::Base
       end
     end
 
-    # get the md5 of origin file, and we can compare this value to reduce file in future.
+    # get the md5 of origin file, and we can compare this value to find duplicated file in future.
     self.md5 = Digest::MD5.file(temp_file_name).to_s
     final_file_name = "#{file_location_prefix}/#{self.md5}.mp4"
     FileUtils.mv(temp_file_name, final_file_name)
@@ -73,11 +78,35 @@ class Video < ActiveRecord::Base
   end
 
   def sync_with_origin
+
+    self.active = true
+    self.save!
+
     logger.debug "Starting sync with origin link, at #{DateTime.now}"
     set_metadata
     download_file
 
+    self.last_fetch_date = DateTime.now
+    self.active = false
     self.save!
-    logger.debug "Finished sync, at #{DateTime.now}"
+    logger.debug "Finished sync, at #{self.last_fetch_date}"
+  end
+
+  def self.batch_update_newest_video
+    videos_data = JSON.load(open("http://www.vrideo.com/api/v1/videos/most_recent?items_per_page=100"))
+    videos_data["items"].each do |video_item|
+      Video.find_or_create_by!(source_type: "vrideo", source_video_id: video_item["video_id"])
+    end
+  end
+
+  def self.sync_next_video
+    Video.where("md5": nil, "active": nil).first.try(:sync_with_origin)
+  end
+
+  def self.batch_sync_metadata
+    Video.where("last_metadata_fetch_date IS NOT NULL AND last_metadata_fetch_date < ?", DateTime.now.yesterday).each do |video|
+      video.set_daily_update_metadata
+      video.save!
+    end
   end
 end

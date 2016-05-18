@@ -18,10 +18,14 @@ ActiveAdmin.register Video do
     column :name do |video|
       link_to(video.name, video.origin_link, target: "_blank")
     end
-    column :desc
+    column :desc do |video|
+      video.desc.try(:html_safe)
+    end
     column :creator_name
     column :num_of_views
     column :num_of_comments
+    column :active
+    column :last_fetch_date
     actions do |video|
       link_to("Preview", video.relative_file_url, target: "_blank")
     end
