@@ -22,6 +22,7 @@ class Video < ActiveRecord::Base
     browser.get(origin_link)
     @doc = Nokogiri::HTML(browser.page_source)
     browser.close
+    browser.quit
     @doc
   end
 
@@ -34,10 +35,11 @@ class Video < ActiveRecord::Base
     self.num_of_comments = comments['data']['total']
   end
 
-  def set_daily_update_metadata
+  def set_num_of_views_and_comments
     set_num_of_views
     set_num_of_comments
     self.last_metadata_fetch_date = DateTime.now
+    logger.debug "Number of views and comments updated at: #{self.last_metadata_fetch_date}"
   end
 
   def set_metadata
@@ -47,7 +49,7 @@ class Video < ActiveRecord::Base
     self.desc = doc.css('#video-description').first.inner_html.strip
     self.creator_name = doc.css('.channel-title span a').first.inner_html.strip
 
-    set_daily_update_metadata
+    set_num_of_views_and_comments
 
     # creator_desc, nothing found in origin page about this column
   end
@@ -57,6 +59,9 @@ class Video < ActiveRecord::Base
   end
 
   def download_file
+
+    return true if self.id > 10 #FIXME add this condition for demo
+
     logger.debug "Starting download file"
 
     file_location_prefix = "#{Rails.root}/public/videos"
@@ -92,7 +97,7 @@ class Video < ActiveRecord::Base
     logger.debug "Finished sync, at #{self.last_fetch_date}"
   end
 
-  def self.batch_update_newest_video
+  def self.batch_update_newest_video_basic_info
     videos_data = JSON.load(open("http://www.vrideo.com/api/v1/videos/most_recent?items_per_page=100"))
     videos_data["items"].each do |video_item|
       Video.find_or_create_by!(source_type: "vrideo", source_video_id: video_item["video_id"])
@@ -103,10 +108,12 @@ class Video < ActiveRecord::Base
     Video.where("md5": nil, "active": nil).first.try(:sync_with_origin)
   end
 
-  def self.batch_sync_metadata
+  def self.batch_sync_num_of_views_and_comments
+    logger.debug("Starting batch sync nums of views and comments")
     Video.where("last_metadata_fetch_date IS NOT NULL AND last_metadata_fetch_date < ?", DateTime.now.yesterday).each do |video|
-      video.set_daily_update_metadata
+      video.set_num_of_views_and_comments
       video.save!
     end
+    logger.debug("Fnished batch sync nums of views and comments")
   end
 end
