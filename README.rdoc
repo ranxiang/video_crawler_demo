@@ -19,6 +19,25 @@ Things you may want to cover:
 
 * Services (job queues, cache servers, search engines, etc.)
 
+Please config cronjob to execute following command each day:
+rake crawler:batch_sync_num_of_views_and_comments
+
+Daemon process:
+
+Please use following command to sart a daemon process to sync video detail info and video file
+
+BACKGROUND=y bundle exec rake crawler:batch_sync_videos
+
+You can kill it by execute command: kill `cat bach_sync_videos.pid`
+
+
+Please use following command to sart a daemon process to get all newest(top100) video basic info.
+
+BACKGROUND=y bundle exec rake crawler:batch_update_newest_video_basic_info
+
+You can kill it by execute command: kill `cat update_newest_video_basic_info.pid`
+
+
 * Deployment instructions
 
 * ...
