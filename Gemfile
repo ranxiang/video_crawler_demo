@@ -60,3 +60,9 @@ gem 'rvm1-capistrano3', require: false, group: :development
 # ruby web server
 gem 'puma'
 gem 'capistrano3-puma', group: :development
+
+
+# See https://github.com/sstephenson/execjs#readme for more supported runtimes
+install_if -> { RUBY_PLATFORM =~ /linux/ } do
+    gem "therubyracer"
+end
