@@ -16,32 +16,68 @@ class Video < ActiveRecord::Base
     end
   end
 
-  def sync_with_origin
-
+  def doc
+    return @doc if @doc.present?
     browser = Selenium::WebDriver.for :phantomjs
     browser.get(origin_link)
-    doc = Nokogiri::HTML(browser.page_source)
+    @doc = Nokogiri::HTML(browser.page_source)
     browser.close
+    @doc
+  end
+
+  def set_num_of_views
+    self.num_of_views = doc.css('#like-dislike-bar .views').inner_html.split(' ').first
+  end
+
+  def set_num_of_comments
+    comments = JSON.load(open("http://www.vrideo.com/api/v1/videos/#{source_video_id}/comments?get_meta_data=1"))
+    self.num_of_comments = comments['data']['total']
+  end
+
+  def set_metadata
+    logger.debug "Starting set metadata"
 
     self.name = doc.css('.watch-page .title').first.inner_html.strip
     self.desc = doc.css('#video-description').first.inner_html.strip
     self.creator_name = doc.css('.channel-title span a').first.inner_html.strip
 
+    set_num_of_views
+    set_num_of_comments
+
     # creator_desc, nothing found in origin page about this column
+  end
 
-    self.num_of_views = doc.css('#like-dislike-bar .views').inner_html.split(' ').first
+  def relative_file_url
+    "/videos/#{self.md5}.mp4"
+  end
 
-    comments = JSON.load(open("http://www.vrideo.com/api/v1/videos/#{source_video_id}/comments?get_meta_data=1"))
-    self.num_of_comments = comments['data']['total']
+  def download_file
+    logger.debug "Starting download file"
 
-    # TODO store video file to local
+    file_location_prefix = "#{Rails.root}/public/videos"
 
-    File.open("#{Rails.root}/public/videos/#{source_video_id}.mp4", "wb") do |saved_file|
+    temp_file_name = "#{file_location_prefix}/#{source_type}_#{source_video_id}.mp4"
+
+    # download file and save it in local
+    File.open(temp_file_name, "wb") do |saved_file|
       open(source_video_file_link, "rb") do |read_file|
         saved_file.write(read_file.read)
       end
     end
 
+    # get the md5 of origin file, and we can compare this value to reduce file in future.
+    self.md5 = Digest::MD5.file(temp_file_name).to_s
+    final_file_name = "#{file_location_prefix}/#{self.md5}.mp4"
+    FileUtils.mv(temp_file_name, final_file_name)
+    logger.debug "file location is: #{final_file_name}"
+  end
+
+  def sync_with_origin
+    logger.debug "Starting sync with origin link, at #{DateTime.now}"
+    set_metadata
+    download_file
+
     self.save!
+    logger.debug "Finished sync, at #{DateTime.now}"
   end
 end

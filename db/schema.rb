@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160517081958) do
+ActiveRecord::Schema.define(version: 20160518052200) do
 
   create_table "active_admin_comments", force: :cascade do |t|
     t.string   "namespace",     limit: 255
@@ -39,6 +39,7 @@ ActiveRecord::Schema.define(version: 20160517081958) do
     t.datetime "updated_at",                    null: false
     t.string   "source_type",     limit: 255
     t.string   "source_video_id", limit: 255
+    t.string   "md5",             limit: 255
   end
 
 end
