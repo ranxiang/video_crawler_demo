@@ -60,7 +60,10 @@ class Video < ActiveRecord::Base
 
   def download_file
 
-    return true if self.id > 10 #FIXME add this condition for demo
+    if self.id > 10 #FIXME add this condition for demo
+      self.md5 = "test"
+      return true
+    end
 
     logger.debug "Starting download file"
 
@@ -87,14 +90,25 @@ class Video < ActiveRecord::Base
     self.active = true
     self.save!
 
-    logger.debug "Starting sync with origin link, at #{DateTime.now}"
-    set_metadata
-    download_file
+    begin
+      logger.debug "Starting sync with origin link, at #{DateTime.now}"
+      self.transaction do
+        set_metadata
+        download_file
 
-    self.last_fetch_date = DateTime.now
-    self.active = false
-    self.save!
-    logger.debug "Finished sync, at #{self.last_fetch_date}"
+        self.last_fetch_date = DateTime.now
+        self.active = false
+        self.save!
+        logger.debug "Finished sync, at #{self.last_fetch_date}"
+      end
+    rescue StandardError => e
+      logger.error "Sync with origin failed, ID:(#{self.id})"
+      self.active = false
+      self.retry_count = self.retry_count || 0
+      self.retry_count = self.retry_count + 1
+      self.save!
+      raise e
+    end
   end
 
   def self.batch_update_newest_video_basic_info
@@ -105,7 +119,8 @@ class Video < ActiveRecord::Base
   end
 
   def self.sync_next_video
-    Video.where("md5": nil, "active": nil).first.try(:sync_with_origin)
+    video = Video.where("md5 IS NULL AND (active IS NULL OR active = 0) AND (retry_count IS NULL OR retry_count < 5)").first
+    video.try(:sync_with_origin)
   end
 
   def self.batch_sync_num_of_views_and_comments
