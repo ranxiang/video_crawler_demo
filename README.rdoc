@@ -40,6 +40,10 @@ You can kill it by execute command: kill `cat update_newest_video_basic_info.pid
 
 * Deployment instructions
 
+Please config cronjob like below to update the number of views and comments each day.
+
+01 01 * * * RAILS_ENV=production bundle exec rake crawler:batch_sync_num_of_views_and_comments > /dev/null
+
 * ...
 
 
